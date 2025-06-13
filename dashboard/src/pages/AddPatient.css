@@ -1,0 +1,56 @@
+/* General layout */
+.addpatient {
+    display: flex;
+    background-color: #f5f6fa;
+    min-height: 100vh;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Content next to sidebar */
+.content {
+    flex: 1;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Header */
+.content h1 {
+    color: #2f4156;
+    font-size: 36px;
+    margin-bottom: 30px;
+    font-weight: bold;
+}
+
+/* Form container */
+.textbox {
+    background-color: #ffffff;
+    padding: 30px 40px;
+    border-radius: 16px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    max-width: 500px;
+}
+
+/* Form inputs */
+.textbox .MuiFormControl-root,
+.textbox .MuiTextField-root {
+    width: 100%;
+}
+
+/* Submit button */
+.textbox .MuiButton-root {
+    background-color: #2f4156;
+    color: #ffffff;
+    font-weight: bold;
+    padding: 10px 0;
+    transition: background-color 0.3s ease;
+}
+
+.textbox .MuiButton-root:hover {
+    background-color: #1d2b3a;
+}

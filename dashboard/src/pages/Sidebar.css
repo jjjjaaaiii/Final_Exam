@@ -1,0 +1,38 @@
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background-color: #2F4156; /* Dark muted blue */
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.1);
+  position: fixed;
+}
+
+.conSidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.item {
+  background-color: #C8D9E3; /* Light blue-gray */
+  padding: 12px 16px;
+  border-radius: 12px;
+  color: #2F4156;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.item:hover {
+  background-color: #F5EFEB; /* Soft off-white */
+  color: #83644F; /* Coffee-brown accent */
+  transform: translateX(4px);
+}
+
+.item p {
+  margin: 0;
+  font-size: 16px;
+}
