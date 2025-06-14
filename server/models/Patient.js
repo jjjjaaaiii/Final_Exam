@@ -2,36 +2,37 @@ const mongoose = require("mongoose");
 
 const patientSchema = new mongoose.Schema(
   {
-    patientname: {
+    name: {
       type: String,
-      required: true,
+      required: [true, "Patient name is required"],
+      maxlength: [50, "Name cannot exceed 50 characters"],
       trim: true,
     },
     age: {
       type: Number,
-      required: true,
-      min: 0,
-      max: 120,
+      min: [0, "Age cannot be negative"],
+      max: [120, "Age cannot exceed 120"],
     },
     gender: {
       type: String,
-      required: true,
       enum: ["Male", "Female", "Other"],
-    },
-    contactinformation: {
-      type: Number,
-      required: true,
       trim: true,
     },
-    medicalhistory: {
+    contact: {
       type: String,
-      default: "",
+      required: [true, "Contact number is required"],
+      match: [/^\d{11}$/, "Contact must be exactly 11 digits"],
+      trim: true,
+    },
+    medicalHistory: {
+      type: String,
       trim: true,
     },
   },
-  { collection: "patients" }
+  {
+    timestamps: true, // adds createdAt and updatedAt fields automatically
+  }
 );
 
 const Patient = mongoose.model("Patient", patientSchema);
-
 module.exports = Patient;

@@ -1,27 +1,27 @@
+// server.js or routes/patient.js
 const express = require("express");
 const router = express.Router();
-const Patient = require("../models/Patient");
+const Patient = require("./models/Patient"); // Adjust path if needed
 
-// POST /patients
-router.post("/", async (req, res) => {
-    try {
-        const newPatient = new Patient(req.body);
-        await newPatient.save();
-        res.status(201).json({ message: "Patient added successfully!" });
-    } catch (err) {
-        console.error("❌ Error saving patient:", err);
-        res.status(500).json({ message: "Server error" });
-    }
-});
-// backend/routes/patients.js or similar
-router.get('/api/viewpatients', async (req, res) => {
+router.post("/addPatient", async (req, res) => {
   try {
-    const patients = await Patient.find();
-    res.json(patients);
+    const { name, age, gender, contact, medicalHistory } = req.body;
+
+    const newPatient = new Patient({
+      name,
+      age,
+      gender,
+      contact,
+      medicalHistory,
+    });
+
+    await newPatient.save();
+
+    res.json({ success: true, message: "Patient added successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Failed to fetch patients" });
+    console.error("Error saving patient:", error);
+    res.status(500).json({ success: false, message: "Failed to save patient" });
   }
 });
-
 
 module.exports = router;
