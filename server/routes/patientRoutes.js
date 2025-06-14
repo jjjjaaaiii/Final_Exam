@@ -1,27 +1,17 @@
-// server.js or routes/patient.js
-const express = require("express");
+// routes/patientRoutes.js
+import express from "express";
+import Patient from "../models/Patient.js";
+
 const router = express.Router();
-const Patient = require("./models/Patient"); // Adjust path if needed
 
-router.post("/addPatient", async (req, res) => {
+router.post("/", async (req, res) => {
   try {
-    const { name, age, gender, contact, medicalHistory } = req.body;
-
-    const newPatient = new Patient({
-      name,
-      age,
-      gender,
-      contact,
-      medicalHistory,
-    });
-
+    const newPatient = new Patient(req.body);
     await newPatient.save();
-
-    res.json({ success: true, message: "Patient added successfully" });
+    res.status(201).json(newPatient);
   } catch (error) {
-    console.error("Error saving patient:", error);
-    res.status(500).json({ success: false, message: "Failed to save patient" });
+    res.status(400).json({ message: error.message });
   }
 });
 
-module.exports = router;
+export default router;

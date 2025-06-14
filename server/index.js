@@ -1,13 +1,15 @@
-const express = require("express");
-const cors = require("cors");
-const mongoose = require("mongoose");
+import express from "express";
+import cors from "cors";
+import mongoose from "mongoose";
+
 const app = express();
+const PORT = 1337;
+app.use("/patients", patientRoutes); 
 
 app.use(cors());
 app.use(express.json());
 
-mongoose.connect("mongodb://localhost:27017/patientdb");
-
+// Mongoose Patient schema and model
 const patientSchema = new mongoose.Schema({
   name: String,
   age: Number,
@@ -15,44 +17,27 @@ const patientSchema = new mongoose.Schema({
   contact: String,
   medicalHistory: String,
 });
-
 const Patient = mongoose.model("Patient", patientSchema);
 
-app.post("/api/patient", async (req, res) => {
+// POST /patients route
+app.post("/patients", async (req, res) => {
   try {
-    const patient = new Patient(req.body);
-    await patient.save();
-    res.json({ success: true, message: "Patient added successfully" });
+    const newPatient = new Patient(req.body);
+    await newPatient.save();
+    res.status(201).json(newPatient);
   } catch (err) {
-    res.status(500).json({ success: false, message: "Failed to add patient" });
+    res.status(400).json({ message: err.message });
   }
 });
 
-app.get("/api/viewpatients", async (req, res) => {
-  try {
-    const patients = await Patient.find();
-    res.json(patients);
-  } catch {
-    res.status(500).json({ error: "Failed to fetch patients" });
-  }
-});
-
-app.post("/api/updatepatientmongo", async (req, res) => {
-  try {
-    const updated = await Patient.findByIdAndUpdate(req.body._id, req.body, { new: true });
-    res.json({ success: true, message: "Updated", patient: updated });
-  } catch {
-    res.status(500).json({ success: false, message: "Update failed" });
-  }
-});
-
-app.delete("/api/deletepatient/:id", async (req, res) => {
-  try {
-    await Patient.findByIdAndDelete(req.params.id);
-    res.json({ success: true, message: "Deleted" });
-  } catch {
-    res.status(500).json({ success: false, message: "Deletion failed" });
-  }
-});
-
-app.listen(1337, () => console.log("Server running on port 1337"));
+mongoose
+  .connect("mongodb://127.0.0.1:27017/patientDB", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
+  .then(() => {
+    app.listen(PORT, () => {
+      console.log(`Server is running on http://localhost:${PORT}`);
+    });
+  })
+  .catch((err) => console.error("MongoDB connection error:", err));

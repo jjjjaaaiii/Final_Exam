@@ -1,20 +1,16 @@
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { useState } from "react";
-import AddPatient from "./pages/AddPatient";
-import ViewPatient from "./pages/ViewPatient";
-import Dashboard from "./pages/Dashboard"; // ✅ Required import
-import "./App.css";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import AddPatient from "./components/AddPatient";
+import PatientList from "./components/PatientList";
+import EditPatient from "./components/EditPatient";
 
-function App() {
+export default function App() {
   return (
-    <BrowserRouter>
+    <Router>
       <Routes>
-        <Route path="/" element={<Dashboard />} />
-        <Route path="/addpatient" element={<AddPatient />} />
-        <Route path="/viewpatient" element={<ViewPatient />} />
+        <Route path="/" element={<PatientList />} />
+        <Route path="/add" element={<AddPatient />} />
+        <Route path="/edit/:id" element={<EditPatient />} />
       </Routes>
-    </BrowserRouter>
+    </Router>
   );
 }
-
-export default App;
