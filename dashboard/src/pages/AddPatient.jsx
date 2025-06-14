@@ -31,28 +31,34 @@ function AddPatient() {
   };
 
   const handleAddPatient = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    try {
-      const res = await fetch(`${baseUrl}/patient`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(patient),
+  try {
+    const res = await fetch(`${baseUrl}/patients`, {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify(patient),
+});
+
+
+    // ✅ Check if response has body
+    const text = await res.text();
+    const result = text ? JSON.parse(text) : {};
+
+    if (res.ok) {
+      alert(result.message || "Patient added successfully!");
+      setPatient({
+        name: "", age: "", gender: "", contact: "", medicalHistory: "",
       });
-
-      const result = await res.json();
-      alert(result.message);
-
-      if (result.success) {
-        setPatient({
-          name: "", age: "", gender: "", contact: "", medicalHistory: "",
-        });
-      }
-    } catch (error) {
-      console.error("Error adding patient:", error);
-      alert("Error: " + (error.message || "Unknown error occurred"));
+    } else {
+      
     }
-  };
+  } catch (error) {
+    console.error("Error adding patient:", error);
+    alert("Error: " + (error.message || "Unknown error occurred"));
+  }
+};
+
 
   return (
     <div className="addpatient" style={{ display: "flex" }}>
@@ -60,8 +66,18 @@ function AddPatient() {
       <div className="content" style={{ marginLeft: "220px" }}>
         <h1>ADD PATIENT</h1>
         <form className="textbox" onSubmit={handleAddPatient}>
-          <TextField required name="name" label="Patient Name" value={patient.name} onChange={handleChange} fullWidth margin="normal" />
-          <TextField required name="age" label="Age" value={patient.age} onChange={handleChange} fullWidth margin="normal" />
+          <TextField 
+          required name="name" 
+          label="Patient Name" 
+          value={patient.name} 
+          onChange={handleChange} 
+          fullWidth margin="normal" />
+          <TextField 
+          required name="age" 
+          label="Age" 
+          value={patient.age} 
+          onChange={handleChange} 
+          fullWidth margin="normal" />
           <FormControl required fullWidth margin="normal">
             <InputLabel id="gender-label">Gender</InputLabel>
             <Select labelId="gender-label" name="gender" value={patient.gender} onChange={handleChange} label="Gender">
