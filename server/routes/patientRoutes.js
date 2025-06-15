@@ -5,13 +5,13 @@ const Patient = require("./models/Patient"); // Adjust path if needed
 
 router.post("/addPatient", async (req, res) => {
   try {
-    const { name, age, gender, contact, medicalHistory } = req.body;
+    const { name, age, gender, contactInfo, medicalHistory } = req.body;
 
     const newPatient = new Patient({
       name,
       age,
       gender,
-      contact,
+      contactInfo,
       medicalHistory,
     });
 

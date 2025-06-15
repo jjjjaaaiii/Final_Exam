@@ -12,7 +12,7 @@ function AddPatient() {
     name: "",
     age: "",
     gender: "",
-    contact: "",
+    contactInfo: "",
     medicalHistory: "",
   });
 
@@ -30,29 +30,34 @@ function AddPatient() {
     setPatient({ ...patient, [name]: value });
   };
 
-  const handleAddPatient = async (e) => {
-    e.preventDefault();
+  const baseUrl = "http://localhost:1337";
 
-    try {
-      const res = await fetch(`${baseUrl}/patient`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(patient),
-      });
+const handleAddPatient = async () => {
+  try {
+    const response = await fetch(`${baseUrl}/api/patient`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(patient),
+    });
 
-      const result = await res.json();
-      alert(result.message);
-
-      if (result.success) {
-        setPatient({
-          name: "", age: "", gender: "", contact: "", medicalHistory: "",
-        });
-      }
-    } catch (error) {
-      console.error("Error adding patient:", error);
-      alert("Error: " + (error.message || "Unknown error occurred"));
+    if (!response.ok) {
+      throw new Error("HTTP error! status: " + response.status);
     }
-  };
+
+    let data = {};
+    try {
+      data = await response.json();
+    } catch (e) {
+      console.warn("Response is not valid JSON");
+    }
+
+    console.log("Patient added:", data);
+  } catch (err) {
+    console.error("Error adding patient:", err);
+  }
+};
 
   return (
     <div className="addpatient" style={{ display: "flex" }}>
@@ -63,14 +68,14 @@ function AddPatient() {
           <TextField required name="name" label="Patient Name" value={patient.name} onChange={handleChange} fullWidth margin="normal" />
           <TextField required name="age" label="Age" value={patient.age} onChange={handleChange} fullWidth margin="normal" />
           <FormControl required fullWidth margin="normal">
-            <InputLabel id="gender-label">Gender</InputLabel>
-            <Select labelId="gender-label" name="gender" value={patient.gender} onChange={handleChange} label="Gender">
+            <InputLabel id="gender">Gender</InputLabel>
+            <Select labelId="gender" name="gender" value={patient.gender} onChange={handleChange} label="Gender">
               <MenuItem value="Male">Male</MenuItem>
               <MenuItem value="Female">Female</MenuItem>
               <MenuItem value="Other">Other</MenuItem>
             </Select>
           </FormControl>
-          <TextField required name="contact" label="Contact Information" value={patient.contact} onChange={handleChange} inputProps={{ maxLength: 11 }} fullWidth margin="normal" />
+          <TextField required name="contactInfo" label="Contact Information" value={patient.contact} onChange={handleChange} inputProps={{ maxLength: 11 }} fullWidth margin="normal" />
           <TextField name="medicalHistory" label="Medical History" value={patient.medicalHistory} onChange={handleChange} multiline rows={4} fullWidth margin="normal" />
           <Button variant="contained" color="primary" type="submit" style={{ marginTop: "20px" }}>
             ADD PATIENT

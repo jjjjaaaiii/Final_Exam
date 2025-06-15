@@ -12,7 +12,7 @@ const patientSchema = new mongoose.Schema({
   name: String,
   age: Number,
   gender: String,
-  contact: String,
+  contactInfo: Number,
   medicalHistory: String,
 });
 
@@ -36,6 +36,7 @@ app.get("/api/viewpatients", async (req, res) => {
     res.status(500).json({ error: "Failed to fetch patients" });
   }
 });
+
 
 app.post("/api/updatepatientmongo", async (req, res) => {
   try {

@@ -18,20 +18,17 @@ function ViewPatient() {
   const [fetchError, setFetchError] = useState(null);
 const baseUrl = import.meta.env.VITE_API_BASE;
 
-function fetchPatients() {
-  fetch(`${baseUrl}/viewpatients`)
-    .then(res => {
-      if (!res.ok) {
-        throw new Error(`HTTP ${res.status}`);
-      }
-      return res.json(); // <-- ensures valid JSON
+useEffect(() => {
+  fetch("http://localhost:1337/api/viewpatients")
+    .then((res) => res.json())
+    .then((data) => {
+      setPatients(data); // Make sure setPatients is defined via useState
     })
-    .then(setPatients)
-    .catch(err => {
-      console.error("Error fetching patients:", err);
-      setFetchError(`Failed to fetch: ${err.message}`);
+    .catch((err) => {
+      console.error("Failed to fetch patients:", err);
     });
-}
+}, []);
+
 
   const handleEditClick = (patient) => {
     setSelectedPatient(patient);
@@ -63,24 +60,26 @@ function fetchPatients() {
     setSelectedPatient((prev) => ({ ...prev, [name]: value }));
   };
 
-  const handleUpdatePatient = () => {
-    fetch(`${baseUrl}/updatepatientmongo`, {
+  const handleUpdatePatient = async (updatedPatient) => {
+  try {
+    const response = await fetch(`${baseUrl}/api/updatepatientmongo`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(selectedPatient),
-    })
-      .then((res) => res.json())
-      .then(() => {
-        alert("Patient updated successfully!");
-        setModalOpen(false);
-        setSelectedPatient(null);
-        fetchPatients(); // Refresh list
-      })
-      .catch((err) => {
-        console.error("Error updating patient:", err);
-        alert("Failed to update patient.");
-      });
-  };
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(updatedPatient), // ✅ this must be plain object, not event
+    });
+
+    if (!response.ok) {
+      throw new Error("HTTP error! status: " + response.status);
+    }
+
+    const data = await response.json();
+    console.log("Patient updated:", data);
+  } catch (error) {
+    console.error("Error updating patient:", error);
+  }
+};
 
   return (
     <div className="patient-container">
@@ -109,7 +108,7 @@ function fetchPatients() {
                     <TableCell>{patient.name}</TableCell>
                     <TableCell>{patient.age}</TableCell>
                     <TableCell>{patient.gender}</TableCell>
-                    <TableCell>{patient.contact}</TableCell>
+                    <TableCell>{patient.contactInfo}</TableCell>
                     <TableCell>{patient.medicalHistory}</TableCell>
                     <TableCell align="center">
                       <Button variant="outlined" size="small" onClick={() => handleEditClick(patient)}>

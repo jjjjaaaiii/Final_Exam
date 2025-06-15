@@ -18,8 +18,8 @@ const patientSchema = new mongoose.Schema(
       enum: ["Male", "Female", "Other"],
       trim: true,
     },
-    contact: {
-      type: String,
+    contactInfo: {
+      type: Number,
       required: [true, "Contact number is required"],
       match: [/^\d{11}$/, "Contact must be exactly 11 digits"],
       trim: true,
