@@ -1,159 +1,136 @@
 import React, { useEffect, useState } from "react";
-import {
-  Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Paper, Button, Modal,
-  Box, TextField, Select, MenuItem, InputLabel,
-  FormControl, Typography
-} from "@mui/material";
-import Sidebar from "./Sidebar";
-import "./Sidebar.css";
-import "./ViewPatient.css";
+import Sidebar from "./Sidebar"; // adjust path if needed
 
-const baseUrl = import.meta.env.VITE_API_BASE;
+const baseUrl = "http://localhost:1337";
 
-function ViewPatient() {
+export default function ViewPatient() {
   const [patients, setPatients] = useState([]);
-  const [selectedPatient, setSelectedPatient] = useState(null);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [fetchError, setFetchError] = useState(null);
-const baseUrl = import.meta.env.VITE_API_BASE;
+  const [editingPatient, setEditingPatient] = useState(null);
 
-useEffect(() => {
-  fetch("http://localhost:1337/api/viewpatients")
-    .then((res) => res.json())
-    .then((data) => {
-      setPatients(data); // Make sure setPatients is defined via useState
-    })
-    .catch((err) => {
+  const fetchPatients = async () => {
+    try {
+      const res = await fetch(`${baseUrl}/api/viewpatients`);
+      const data = await res.json();
+      setPatients(data);
+    } catch (err) {
       console.error("Failed to fetch patients:", err);
-    });
-}, []);
-
-
-  const handleEditClick = (patient) => {
-    setSelectedPatient(patient);
-    setModalOpen(true);
-  };
-
-  const handleDeletePatient = (id) => {
-    if (window.confirm("Are you sure you want to delete this patient?")) {
-      fetch(`${baseUrl}/deletepatient/${id}`, { method: "DELETE" })
-        .then((res) => res.json())
-        .then(() => {
-          alert("Patient deleted successfully!");
-          setPatients((prev) => prev.filter((p) => p._id !== id));
-        })
-        .catch((err) => {
-          console.error("Error deleting patient:", err);
-          alert("Failed to delete patient.");
-        });
     }
   };
 
-  const handleCloseModal = () => {
-    setModalOpen(false);
-    setSelectedPatient(null);
-  };
+  useEffect(() => {
+    fetchPatients();
+  }, []);
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setSelectedPatient((prev) => ({ ...prev, [name]: value }));
-  };
+  const handleUpdatePatient = async () => {
+    try {
+      const res = await fetch(`${baseUrl}/api/updatepatientmongo`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(editingPatient),
+      });
 
-  const handleUpdatePatient = async (updatedPatient) => {
-  try {
-    const response = await fetch(`${baseUrl}/api/updatepatientmongo`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify(updatedPatient), // ✅ this must be plain object, not event
-    });
+      if (!res.ok) throw new Error("Failed to update patient");
 
-    if (!response.ok) {
-      throw new Error("HTTP error! status: " + response.status);
+      setEditingPatient(null);
+      fetchPatients();
+    } catch (err) {
+      console.error("Error updating patient:", err);
     }
+  };
 
-    const data = await response.json();
-    console.log("Patient updated:", data);
-  } catch (error) {
-    console.error("Error updating patient:", error);
-  }
-};
+  const handleDeletePatient = async (id) => {
+    try {
+      const res = await fetch(`${baseUrl}/api/deletepatient/${id}`, {
+        method: "DELETE",
+      });
+
+      if (!res.ok) throw new Error("Failed to delete patient");
+
+      fetchPatients();
+    } catch (err) {
+      console.error("Error deleting patient:", err);
+    }
+  };
 
   return (
-    <div className="patient-container">
-      <Sidebar />
-      <div className="patient-content">
-        <Typography className="patient-header" variant="h4" gutterBottom>
-          Patient List
-        </Typography>
+    <div style={{ display: "flex", height: "100vh" }}>
+      {/* Sidebar - fixed width */}
+      <div style={{ width: "250px", borderRight: "1px solid #ccc" }}>
+        <Sidebar />
+      </div>
 
-        <TableContainer component={Paper} className="patient-table-container">
-          <Table stickyHeader>
-            <TableHead>
-              <TableRow>
-                <TableCell>Patient Name</TableCell>
-                <TableCell>Age</TableCell>
-                <TableCell>Gender</TableCell>
-                <TableCell>Contact Number</TableCell>
-                <TableCell>Medical History</TableCell>
-                <TableCell align="center">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {patients.length > 0 ? (
-                patients.map((patient) => (
-                  <TableRow key={patient._id}>
-                    <TableCell>{patient.name}</TableCell>
-                    <TableCell>{patient.age}</TableCell>
-                    <TableCell>{patient.gender}</TableCell>
-                    <TableCell>{patient.contactInfo}</TableCell>
-                    <TableCell>{patient.medicalHistory}</TableCell>
-                    <TableCell align="center">
-                      <Button variant="outlined" size="small" onClick={() => handleEditClick(patient)}>
-                        Edit
-                      </Button>
-                      <Button variant="outlined" size="small" color="error" onClick={() => handleDeletePatient(patient._id)} sx={{ ml: 1 }}>
-                        Delete
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={6} align="center">
-                    No patients found.
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
+      {/* Main content fills the rest */}
+      <div style={{ flex: 1, padding: "20px", overflowY: "auto" }}>
+        <h2>Patient List</h2>
 
-        <Modal open={modalOpen} onClose={handleCloseModal}>
-          <Box className="edit-modal">
-            <Typography variant="h6">Edit Patient</Typography>
-            <TextField fullWidth margin="normal" label="Patient Name" name="name" value={selectedPatient?.name || ""} onChange={handleInputChange} />
-            <TextField fullWidth margin="normal" label="Age" name="age" type="number" value={selectedPatient?.age || ""} onChange={handleInputChange} />
-            <FormControl fullWidth margin="normal">
-              <InputLabel>Gender</InputLabel>
-              <Select name="gender" value={selectedPatient?.gender || ""} onChange={handleInputChange}>
-                <MenuItem value="Male">Male</MenuItem>
-                <MenuItem value="Female">Female</MenuItem>
-                <MenuItem value="Other">Other</MenuItem>
-              </Select>
-            </FormControl>
-            <TextField fullWidth margin="normal" label="Contact Information" name="contact" value={selectedPatient?.contact || ""} onChange={handleInputChange} />
-            <TextField fullWidth margin="normal" label="Medical History" name="medicalHistory" value={selectedPatient?.medicalHistory || ""} onChange={handleInputChange} multiline rows={3} />
-            <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 2 }}>
-              <Button onClick={handleUpdatePatient} variant="contained">Update</Button>
-            </Box>
-          </Box>
-        </Modal>
+        {patients.map((patient) => (
+          <div
+            key={patient._id}
+            style={{
+              border: "1px solid #ccc",
+              margin: "10px 0",
+              padding: "10px",
+              borderRadius: "8px",
+              backgroundColor: "#f9f9f9",
+            }}
+          >
+            {editingPatient && editingPatient._id === patient._id ? (
+              <>
+                <input
+                  value={editingPatient.name}
+                  onChange={(e) =>
+                    setEditingPatient({ ...editingPatient, name: e.target.value })
+                  }
+                  placeholder="Name"
+                />
+                <input
+                  value={editingPatient.age}
+                  onChange={(e) =>
+                    setEditingPatient({ ...editingPatient, age: e.target.value })
+                  }
+                  placeholder="Age"
+                />
+                <input
+                  value={editingPatient.gender}
+                  onChange={(e) =>
+                    setEditingPatient({ ...editingPatient, gender: e.target.value })
+                  }
+                  placeholder="Gender"
+                />
+                <input
+                  value={editingPatient.contactInfo}
+                  onChange={(e) =>
+                    setEditingPatient({ ...editingPatient, contactInfo: e.target.value })
+                  }
+                  placeholder="Contact Info"
+                />
+                <input
+                  value={editingPatient.medicalHistory}
+                  onChange={(e) =>
+                    setEditingPatient({
+                      ...editingPatient,
+                      medicalHistory: e.target.value,
+                    })
+                  }
+                  placeholder="Medical History"
+                />
+                <button onClick={handleUpdatePatient}>Save</button>
+                <button onClick={() => setEditingPatient(null)}>Cancel</button>
+              </>
+            ) : (
+              <>
+                <p><strong>Name:</strong> {patient.name}</p>
+                <p><strong>Age:</strong> {patient.age}</p>
+                <p><strong>Gender:</strong> {patient.gender}</p>
+                <p><strong>Contact:</strong> {patient.contactInfo}</p>
+                <p><strong>History:</strong> {patient.medicalHistory}</p>
+                <button onClick={() => setEditingPatient(patient)}>Edit</button>
+                <button onClick={() => handleDeletePatient(patient._id)}>Delete</button>
+              </>
+            )}
+          </div>
+        ))}
       </div>
     </div>
   );
 }
-
-export default ViewPatient;
